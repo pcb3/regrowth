@@ -23,6 +23,7 @@
 
 ; graphical constants
 (define MT (empty-scene SCENE-SIZE SCENE-SIZE))
+(define (TREE colour) (circle RADIUS 'solid colour))
 
 ; structures
 (define-struct biome [forest weather mammal])
@@ -42,9 +43,9 @@
 
 (define BIOME1
   (make-biome
-   (cons (make-tree (make-species "ponga" "silver" 10)
-                    (make-posn 20 20) #false) '())
-   (make-weather 10 20 100) (cons (make-animal "pigeon" (make-posn 20 20) 2) '())))
+   (cons (make-tree (make-species "Totara" TOTARA-COLOUR TOTARA-MAX-HEIGHT)
+                    (make-posn 10 10) #false) '())
+   (make-weather 0 0 0) '()))
 
 ; A Forest is one of:
 ; - '()
@@ -56,17 +57,17 @@
 ; it contains a species, a (x, y) position, and a true if it is burning,
 ; false if not
 
-(define TREE0 (make-tree (make-species "totara" "darkgreen" 15)
+(define TREE0 (make-tree (make-species "Totara" "darkgreen" 15)
                          (make-posn 10 10) #false))
-(define TREE1 (make-tree (make-species "rimu" "darkred" 60)
+(define TREE1 (make-tree (make-species "Rimu" "darkred" 60)
                          (make-posn 100 100) #true))
-(define TREE2 (make-tree (make-species "matai" "green" 40)
+(define TREE2 (make-tree (make-species "Matai" "green" 40)
                          (make-posn 150 150) #false))
 
 ; A Species is a structure
 ; (make-species String String Number)
 ; A Species is a type of tree, with colour and and maximum height in meters.
-; Each species is symbolically represented with a number (0 4)
+; Each species is symbolically represented with a number (0 3)
 
 ; - "Totara" - 0
 ; - "Rimu" - 1
@@ -113,7 +114,7 @@
 (check-expect (checked-generate-forest BIOME0 0) '())
 
 (check-expect (checked-generate-forest BIOME0 1)
-               (cons (make-tree TOTARA (make-posn 0 0) #false) '()))
+              (cons (make-tree TOTARA (make-posn 0 0) #false) '()))
 
 (define (fn-generate-forest b n)
   (cond
@@ -133,8 +134,8 @@
     [else (cons (checked-generate-tree b)
                 (generate-forest b (sub1 n)))]))
 
-; Biome -> Biome
-; consumes a biome b and outputs a new biome with an new tree structure
+; Biome -> Tree
+; consumes a biome b and outputs a new instance of tree 
 
 (define (fn-generate-tree b)
   (make-tree (select-tree-species (... ...))
@@ -172,6 +173,43 @@
     [(equal? rn 1) RIMU]
     [(equal? rn 2) MATAI]
     [else PONGA]))
+
+; Biome -> Image
+; consumes a biome b and renders the forest to the screen
+
+(check-expect (render-forest BIOME0) MT)
+
+(check-expect (render-forest BIOME1)
+              (place-image
+               (TREE (species-colour (tree-species (first (biome-forest BIOME1)))))
+               (posn-x (tree-position (first (biome-forest BIOME1))))
+               (posn-y (tree-position (first (biome-forest BIOME1))))
+               MT))
+
+(define (fn-render-forest b)
+  (cond
+    [(empty? (biome-forest b)) ...]
+    [else (... (...
+                (species-colour (tree-species (first (biome-forest b)))))
+               (posn-x (tree-position (first (biome-forest b))))
+               (posn-y (tree-position (first (biome-forest b))))
+               (fn-render-forest
+                (make-biome (rest (biome-forest b))
+                            (biome-weather b)
+                            (biome-mammal b))))]))
+
+(define (render-forest b)
+  (cond
+    [(empty? (biome-forest b)) MT]
+    [else (place-image (TREE
+                        (species-colour (tree-species (first (biome-forest b)))))
+                       (posn-x (tree-position (first (biome-forest b))))
+                       (posn-y (tree-position (first (biome-forest b))))
+                       (render-forest
+                        (make-biome (rest (biome-forest b))
+                                    (biome-weather b)
+                                    (biome-mammal b))))]))
+
 
 
 
