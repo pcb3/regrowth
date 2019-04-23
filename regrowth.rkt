@@ -107,11 +107,13 @@
 
 (define (generate-biome b) b)
 
-; Biome -> Biome
-; consumes a biome b and a frequency n and outputs a new biome with n
-; instances of trees
+; Biome -> Forest
+; consumes a biome b and a frequency n and outputs a forest
+; with n instances of trees
+(check-expect (checked-generate-forest BIOME0 0) '())
 
-; need tests here
+(check-expect (checked-generate-forest BIOME0 1)
+               (cons (make-tree TOTARA (make-posn 0 0) #false) '()))
 
 (define (fn-generate-forest b n)
   (cond
@@ -125,20 +127,29 @@
     [else (cons (generate-tree b)
                 (generate-forest b (sub1 n)))]))
 
+(define (checked-generate-forest b n)
+  (cond
+    [(zero? n) '()]
+    [else (cons (checked-generate-tree b)
+                (generate-forest b (sub1 n)))]))
+
 ; Biome -> Biome
 ; consumes a biome b and outputs a new biome with an new tree structure
 
 (define (fn-generate-tree b)
   (make-tree (select-tree-species (... ...))
              (make-posn
-             (random (... ...)) (random (... ...)))
+              (random (... ...)) (random (... ...)))
              ...))
               
 (define (generate-tree b)
   (make-tree
    (select-tree-species (random TREE-SPECIES))
-             (make-posn (random (+ SCENE-SIZE 1))
-                        (random (+ SCENE-SIZE 1))) #false))
+   (make-posn (random (+ SCENE-SIZE 1))
+              (random (+ SCENE-SIZE 1))) #false))
+
+(define (checked-generate-tree b)
+  (make-tree TOTARA (make-posn 0 0) #false))
 
 ; Number -> Species
 ; consumes a random number rn and outputs a species structure
