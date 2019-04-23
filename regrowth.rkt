@@ -11,6 +11,15 @@
 (define SIZE 20)
 (define SCENE-SIZE (* SIZE SIZE))
 (define MAX SCENE-SIZE)
+(define TREE-SPECIES 4)
+(define TOTARA-MAX-HEIGHT 15)
+(define TOTARA-COLOUR 'darkgreen)
+(define RIMU-MAX-HEIGHT 60)
+(define RIMU-COLOUR 'brown)
+(define MATAI-MAX-HEIGHT 40)
+(define MATAI-COLOUR 'green)
+(define PONGA-MAX-HEIGHT 12)
+(define PONGA-COLOUR 'silver)
 
 ; graphical constants
 (define MT (empty-scene SCENE-SIZE SCENE-SIZE))
@@ -56,16 +65,18 @@
 
 ; A Species is a structure
 ; (make-species String String Number)
-; A Species is a type of tree, with colour and and maximum height in meters
-; - "totara", "darkgreen", 20
-; - "rimu", "darkred", 60
-; - "matai", "green", 40
-; - "ponga, "silver" 12
+; A Species is a type of tree, with colour and and maximum height in meters.
+; Each species is symbolically represented with a number (0 4)
 
-(define TOTARA0 (make-species "totara" "darkgreen" 15))
-(define RIMU0 (make-species "rimu" "darkred" 60))
-(define MATAI0 (make-species "matai" "green" 40))
-(define PONGA0 (make-species "ponga" "silver" 12))
+; - "Totara" - 0
+; - "Rimu" - 1
+; - "Matai" - 2
+; - "Ponga" - 3
+
+(define TOTARA (make-species "Totara" TOTARA-COLOUR TOTARA-MAX-HEIGHT))
+(define RIMU (make-species "Rimu" RIMU-COLOUR RIMU-MAX-HEIGHT))
+(define MATAI (make-species "Matai" MATAI-COLOUR MATAI-MAX-HEIGHT))
+(define PONGA (make-species "Ponga" PONGA-COLOUR PONGA-MAX-HEIGHT))
 
 ; A Weather is a structure
 ; (make-weather Number Number Number)
@@ -89,14 +100,24 @@
 ; Biome -> Biome
 ; consumes a biome b and outputs a new biome
 
-(define (fn-generate-tree b)
-  (make-tree (make-species ... ... ...)
-             (random (... (species-height ...) ...)) ...))
-              
-(define (generate-tree b)
-  (make-tree PONGA0
-             (make-posn (random (+ SCENE-SIZE 1))
-                        (random (+ SCENE-SIZE 1))) #false))
+(check-expect (generate-biome (make-biome '() (make-weather 0 0 0) '()))
+              (make-biome '() (make-weather 0 0 0) '()))
+
+(define (fn-generate-biome b) b)
+
+(define (generate-biome b) b)
+
+; Biome -> Biome
+; consumes a biome b and a frequency n and outputs a new biome with n
+; instances of trees
+
+; need tests here
+
+(define (fn-generate-forest b n)
+  (cond
+    [(zero? n) ...]
+    [else (... (generate-forest b n)
+               (generate-forest b (... n)))]))
 
 (define (generate-forest b n)
   (cond
@@ -104,20 +125,42 @@
     [else (cons (generate-tree b)
                 (generate-forest b (sub1 n)))]))
 
-(define FORESTER (generate-forest BIOME0 100))
+; Biome -> Biome
+; consumes a biome b and outputs a new biome with an new tree structure
 
-(place-image (circle RADIUS 'solid (species-colour PONGA0))
-               (random (+ SCENE-SIZE 1))
-                        (random (+ SCENE-SIZE 1)) MT)
+(define (fn-generate-tree b)
+  (make-tree (select-tree-species (... ...))
+             (make-posn
+             (random (... ...)) (random (... ...)))
+             ...))
+              
+(define (generate-tree b)
+  (make-tree
+   (select-tree-species (random TREE-SPECIES))
+             (make-posn (random (+ SCENE-SIZE 1))
+                        (random (+ SCENE-SIZE 1))) #false))
 
-(define (generate-scene b f)
+; Number -> Species
+; consumes a random number rn and outputs a species structure
+
+(check-expect (select-tree-species 0) TOTARA)
+(check-expect (select-tree-species 1) RIMU)
+(check-expect (select-tree-species 2) MATAI)
+(check-expect (select-tree-species 3) PONGA)
+
+(define (fn-select-tree-species rn)
   (cond
-    [(empty? f) MT]
-    [else
-     (place-image (circle RADIUS 'solid (species-colour (tree-species (first f))))
-               (random (+ SCENE-SIZE 1))
-                        (random (+ SCENE-SIZE 1))
-     (generate-scene b (rest f)))]))
+    [(equal? rn 0) ...]
+    [(equal? rn 1) ...]
+    [(equal? rn 2) ...]
+    [else ...]))
+
+(define (select-tree-species rn)
+  (cond
+    [(equal? rn 0) TOTARA]
+    [(equal? rn 1) RIMU]
+    [(equal? rn 2) MATAI]
+    [else PONGA]))
 
 
 
