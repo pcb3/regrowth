@@ -13,11 +13,11 @@
 (define MAX SCENE-SIZE)
 (define TREE-SPECIES 4)
 (define TOTARA-MAX-HEIGHT 15)
-(define TOTARA-COLOUR 'darkgreen)
+(define TOTARA-COLOUR 'goldenrod)
 (define RIMU-MAX-HEIGHT 60)
 (define RIMU-COLOUR 'brown)
 (define MATAI-MAX-HEIGHT 40)
-(define MATAI-COLOUR 'green)
+(define MATAI-COLOUR 'olive)
 (define PONGA-MAX-HEIGHT 12)
 (define PONGA-COLOUR 'silver)
 
@@ -98,17 +98,23 @@
 ; - "possum"
 ; - "rat"
 
-; Biome -> Biome
-; consumes a biome b and outputs a new biome
+; Biome Number -> Biome
+; consumes a biome b and outputs a new biome with a forest of n trees
 
-(check-expect (generate-biome (make-biome '() (make-weather 0 0 0) '()))
+(check-expect (generate-biome (make-biome '() (make-weather 0 0 0) '()) 0)
               (make-biome '() (make-weather 0 0 0) '()))
 
-(define (fn-generate-biome b) b)
+(define (fn-generate-biome b n)
+  (make-biome (generate-forest b n)
+              (biome-weather b)
+              (biome-mammal b)))
 
-(define (generate-biome b) b)
+(define (generate-biome b n)
+  (make-biome (generate-forest b n)
+              (biome-weather b)
+              (biome-mammal b)))
 
-; Biome -> Forest
+; Biome Number -> Forest
 ; consumes a biome b and a frequency n and outputs a forest
 ; with n instances of trees
 (check-expect (checked-generate-forest BIOME0 0) '())
@@ -209,6 +215,8 @@
                         (make-biome (rest (biome-forest b))
                                     (biome-weather b)
                                     (biome-mammal b))))]))
+
+; Forest Tree -> Boolean
 
 
 
