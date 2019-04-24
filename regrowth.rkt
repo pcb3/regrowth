@@ -134,6 +134,16 @@
     [else (cons (generate-tree b)
                 (generate-forest b (sub1 n)))]))
 
+; testing this function to see if we can make a biome
+; delete if not possible, try: (generate-add-forest BIOME0 10)
+(define (generate-add-forest b n)
+  (cond
+    [(zero? n) (make-biome (biome-forest b)
+                           (biome-weather b)
+                           (biome-mammal b))]
+    [else (cons (generate-tree b)
+                (generate-add-forest (biome-forest b) (sub1 n)))]))
+
 (define (checked-generate-forest b n)
   (cond
     [(zero? n) '()]
@@ -216,7 +226,68 @@
                                     (biome-weather b)
                                     (biome-mammal b))))]))
 
-; Forest Tree -> Boolean
+; Forest -> Forest
+; consumes a forest f and generates a new tree if two trees in the forest
+; share the same position
+
+;(check-expect (check-replace-tree '()) '())
+;
+;(check-expect (check-replace-tree
+;               (cons (make-tree TOTARA (make-posn 0 0) #false)
+;                     (cons (make-tree RIMU (make-posn 10 10) #false) '())))
+;              (cons (make-tree TOTARA (make-posn 0 0) #false)
+;                     (cons (make-tree RIMU (make-posn 10 10) #false) '())))
+;
+;(check-expect (check-replace-tree
+;               (cons (make-tree TOTARA (make-posn 0 0) #false)
+;                     (cons (make-tree RIMU (make-posn 0 0) #false) '())))
+;              (cons (make-tree TOTARA (make-posn 0 0) #false)
+;                     (cons (make-tree RIMU (make-posn 10 10) #false) '())))
+
+(define (fn-check-replace-tree f)
+  (cond
+    [(empty? f) ...]
+    [(member? (tree-position (first f)) (tree-position (rest f)))
+     (... (... ...)
+          (fn-check-replace-tree (rest f)))]
+    [else (... (first f)
+               (fn-check-replace-tree (rest f)))]))
+
+(define (check-replace-tree f)
+  (cond
+    [(empty? f) '()]
+    [(boolean=? #true (is-position? (tree-position (first f)) (rest f)))
+     (cons (generate-tree BIOME0)
+           (check-replace-tree (rest f)))]
+    [else (cons (first f)
+                (check-replace-tree (rest f)))]))
+
+(define FOREST0 (generate-forest BIOME0 1000))
+
+; Posn Forest -> Boolean
+; consumes a posn p and forest f and returns true if the position is equal
+; to the position of any other trees in the forest
+
+(check-expect (is-position? (make-posn 0 0) '()) #false)
+
+(check-expect (is-position? (make-posn 0 0)
+                            (cons (make-tree TOTARA (make-posn 0 0) #false)
+                                  (cons (make-tree RIMU (make-posn 10 10) #false)
+                                        '()))) #true)
+
+(define (fn-is-position? p f)
+  (cond
+    [(empty? f) #false]
+    [else (if (equal? p (tree-position (first f)))
+              #true
+              (fn-is-position? p (rest f)))]))
+
+(define (is-position? p f)
+  (cond
+    [(empty? f) #false]
+    [else (if (equal? p (tree-position (first f)))
+              #true
+              (is-position? p (rest f)))]))
 
 
 
