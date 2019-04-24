@@ -43,26 +43,21 @@
 
 (define BIOME1
   (make-biome
-   (cons (make-tree (make-species "Totara" TOTARA-COLOUR TOTARA-MAX-HEIGHT)
-                    (make-posn 10 10) #false) '())
-   (make-weather 0 0 0) '()))
+   (list (make-tree (make-species "Totara" TOTARA-COLOUR TOTARA-MAX-HEIGHT)
+                    (make-posn 10 10) #false)) (make-weather 0 0 0) '()))
 
 ; A Forest is one of:
 ; - '()
 ; - (cons tree Forest)
 
+(define FOREST0 '())
+(define FOREST1 (list FOREST0))
+
 ; A Tree is a structure
-; (make-tree String String Number Posn Boolean)
+; (make-tree Species Posn Boolean)
 ; A tree is a living organism that interacts with the biome.
 ; it contains a species, a (x, y) position, and a true if it is burning,
 ; false if not
-
-(define TREE0 (make-tree (make-species "Totara" "darkgreen" 15)
-                         (make-posn 10 10) #false))
-(define TREE1 (make-tree (make-species "Rimu" "darkred" 60)
-                         (make-posn 100 100) #true))
-(define TREE2 (make-tree (make-species "Matai" "green" 40)
-                         (make-posn 150 150) #false))
 
 ; A Species is a structure
 ; (make-species String String Number)
@@ -78,6 +73,9 @@
 (define RIMU (make-species "Rimu" RIMU-COLOUR RIMU-MAX-HEIGHT))
 (define MATAI (make-species "Matai" MATAI-COLOUR MATAI-MAX-HEIGHT))
 (define PONGA (make-species "Ponga" PONGA-COLOUR PONGA-MAX-HEIGHT))
+
+(define TREE0 (make-tree TOTARA (make-posn 0 0) #false))
+(define TREE1 (make-tree RIMU (make-posn 0 0) #false))
 
 ; A Weather is a structure
 ; (make-weather Number Number Number)
@@ -133,16 +131,6 @@
     [(zero? n) '()]
     [else (cons (generate-tree b)
                 (generate-forest b (sub1 n)))]))
-
-; testing this function to see if we can make a biome
-; delete if not possible, try: (generate-add-forest BIOME0 10)
-(define (generate-add-forest b n)
-  (cond
-    [(zero? n) (make-biome (biome-forest b)
-                           (biome-weather b)
-                           (biome-mammal b))]
-    [else (cons (generate-tree b)
-                (generate-add-forest (biome-forest b) (sub1 n)))]))
 
 (define (checked-generate-forest b n)
   (cond
@@ -230,22 +218,6 @@
 ; consumes a forest f and generates a new tree if two trees in the forest
 ; share the same position
 
-(check-expect (check-replace-tree '()) '())
-
-(check-expect (check-replace-tree
-               (cons (make-tree TOTARA (make-posn 0 0) #false)
-                     (cons (make-tree RIMU (make-posn 10 10) #false) '())))
-              (cons (make-tree TOTARA (make-posn 0 0) #false)
-                     (cons (make-tree RIMU (make-posn 10 10) #false) '())))
-
-(check-expect (check-replace-tree
-               (cons (make-tree TOTARA (make-posn 0 0) #false)
-                     (cons (make-tree RIMU (make-posn 0 0) #false) '())))
-              (cons (make-tree TOTARA (make-posn 0 0) #false)
-                     (cons (make-tree RIMU (make-posn 10 10) #false) '())))
-
-; these tests need to be tested with a checked-function or using check-random
-
 (define (fn-check-replace-tree f)
   (cond
     [(empty? f) ...]
@@ -263,8 +235,6 @@
            (check-replace-tree (rest f)))]
     [else (cons (first f)
                 (check-replace-tree (rest f)))]))
-
-(define FOREST0 (generate-forest BIOME0 1000))
 
 ; Posn Forest -> Boolean
 ; consumes a posn p and forest f and returns true if the position is equal
