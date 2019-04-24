@@ -23,7 +23,7 @@
 
 ; graphical constants
 (define MT (empty-scene SCENE-SIZE SCENE-SIZE))
-(define (TREE colour) (circle RADIUS 'solid colour))
+(define (TREE colour) (circle RADIUS 'outline colour))
 
 ; structures
 (define-struct biome [forest weather mammal])
@@ -260,6 +260,68 @@
     [else (if (equal? p (tree-position (first f)))
               #true
               (is-position? p (rest f)))]))
+
+; Biome -> Biome
+; consumes a biome b and a posn p of a tree, and sets the tree burning field
+; to true and outputs a new biome
+
+(check-expect (extract-burn BIOME0 (make-posn 0 0)) BIOME0)
+
+(check-expect (extract-burn (make-biome
+                     (list (make-tree "Totara" (make-posn 0 0) #false))
+                     (make-weather 0 0 0) '())
+                    (make-posn 0 0))
+              (make-biome
+                     (list (make-tree "Totara" (make-posn 0 0) #true))
+                     (make-weather 0 0 0) '()))
+
+(define (fn-extract-burn b p)
+  (make-biome (... (biome-forest b) p) (biome-weather b) (biome-mammal b)))
+
+(define (extract-burn b p)
+  (make-biome (burn (biome-forest b) p) (biome-weather b) (biome-mammal b)))
+
+; Forest Posn -> Forest
+; consumes a forest f and a posn p and returns a new forest structure with
+; a burning tree if it exists at position p
+
+(check-expect (burn '() (make-posn 0 0)) '())
+
+(check-expect (burn (list (make-tree TOTARA (make-posn 0 0) #false))
+                    (make-posn 0 0))
+              (list (make-tree TOTARA (make-posn 0 0) #true)))
+
+(check-expect (burn (list (make-tree TOTARA (make-posn 0 0) #false)
+                          (make-tree RIMU (make-posn 1 1) #false))
+                    (make-posn 1 1))
+              (list (make-tree TOTARA (make-posn 0 0) #false)
+                    (make-tree RIMU (make-posn 1 1) #true)))
+
+(check-expect (burn (list (make-tree TOTARA (make-posn 0 0) #false)
+                          (make-tree RIMU (make-posn 1 1) #false))
+                    (make-posn 5 5))
+              (list (make-tree TOTARA (make-posn 0 0) #false)
+                    (make-tree RIMU (make-posn 1 1) #false)))
+
+(define (fn-burn f p)
+  (cond
+    [(empty? f) f]
+    [(equal? (tree-position (first f)) p)
+     (... (make-tree (tree-species (first f))
+                     (tree-position (first f))
+                     ...)
+          (fn-burn (rest f) p))]
+    [else (... (first f) (fn-burn (rest f) p))]))
+
+(define (burn f p)
+  (cond
+    [(empty? f) f]
+    [(equal? (tree-position (first f)) p)
+     (cons (make-tree (tree-species (first f))
+                     (tree-position (first f))
+                     #true)
+          (burn (rest f) p))]
+    [else (cons (first f) (burn (rest f) p))]))
 
 
 
