@@ -105,12 +105,12 @@
               (make-biome '() (make-weather 0 0 0) '()))
 
 (define (fn-generate-biome b n)
-  (make-biome (generate-forest b n)
+  (make-biome (... (... b n))
               (biome-weather b)
               (biome-mammal b)))
 
 (define (generate-biome b n)
-  (make-biome (generate-forest b n)
+  (make-biome (check-replace-tree (generate-forest b n))
               (biome-weather b)
               (biome-mammal b)))
 
@@ -230,19 +230,21 @@
 ; consumes a forest f and generates a new tree if two trees in the forest
 ; share the same position
 
-;(check-expect (check-replace-tree '()) '())
-;
-;(check-expect (check-replace-tree
-;               (cons (make-tree TOTARA (make-posn 0 0) #false)
-;                     (cons (make-tree RIMU (make-posn 10 10) #false) '())))
-;              (cons (make-tree TOTARA (make-posn 0 0) #false)
-;                     (cons (make-tree RIMU (make-posn 10 10) #false) '())))
-;
-;(check-expect (check-replace-tree
-;               (cons (make-tree TOTARA (make-posn 0 0) #false)
-;                     (cons (make-tree RIMU (make-posn 0 0) #false) '())))
-;              (cons (make-tree TOTARA (make-posn 0 0) #false)
-;                     (cons (make-tree RIMU (make-posn 10 10) #false) '())))
+(check-expect (check-replace-tree '()) '())
+
+(check-expect (check-replace-tree
+               (cons (make-tree TOTARA (make-posn 0 0) #false)
+                     (cons (make-tree RIMU (make-posn 10 10) #false) '())))
+              (cons (make-tree TOTARA (make-posn 0 0) #false)
+                     (cons (make-tree RIMU (make-posn 10 10) #false) '())))
+
+(check-expect (check-replace-tree
+               (cons (make-tree TOTARA (make-posn 0 0) #false)
+                     (cons (make-tree RIMU (make-posn 0 0) #false) '())))
+              (cons (make-tree TOTARA (make-posn 0 0) #false)
+                     (cons (make-tree RIMU (make-posn 10 10) #false) '())))
+
+; these tests need to be tested with a checked-function or using check-random
 
 (define (fn-check-replace-tree f)
   (cond
