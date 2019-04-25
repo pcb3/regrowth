@@ -20,10 +20,12 @@
 (define MATAI-COLOUR 'olive)
 (define PONGA-MAX-HEIGHT 12)
 (define PONGA-COLOUR 'silver)
+(define FLAME1 'orange)
+(define FLAME2 'red)
 
 ; graphical constants
 (define MT (empty-scene SCENE-SIZE SCENE-SIZE))
-(define (TREE colour) (circle RADIUS 'outline colour))
+(define (TREE colour) (circle RADIUS 'solid colour))
 
 ; structures
 (define-struct biome [forest weather mammal])
@@ -323,11 +325,40 @@
           (burn (rest f) p))]
     [else (cons (first f) (burn (rest f) p))]))
 
+(define BIOME2 (generate-biome BIOME0 2))
+
+; Biome -> String
+; consumes a biome b and outputs a new colour if the condition is true
+
+(check-expect (is-burning? (make-biome
+                            (list (make-tree TOTARA (make-posn 0 0) #false))
+                            (make-weather 0 0 0) '()))
+              'goldenrod)
+
+(check-expect (is-burning? (make-biome
+                            (list (make-tree RIMU (make-posn 0 0) #false)
+                                  (make-tree TOTARA (make-posn 0 0) #true))
+                            (make-weather 0 0 0) '()))
+              'brown)
 
 
+(check-expect (is-burning? (make-biome
+                            (list (make-tree RIMU (make-posn 0 0) #true)
+                                  (make-tree TOTARA (make-posn 0 0) #false))
+                            (make-weather 0 0 0) '()))
+              FLAME2)
 
+(define (fn-is-burning? b)
+  (cond
+    [else (... (boolean=? #true (tree-burning (first (biome-forest b))))
+              ...
+              (species-colour (tree-species (first (biome-forest b)))))]))
 
-
+(define (is-burning? b)
+  (cond
+    [else (if (boolean=? #true (tree-burning (first (biome-forest b))))
+              FLAME2
+              (species-colour (tree-species (first (biome-forest b)))))]))
 
 
 
