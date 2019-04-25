@@ -350,6 +350,46 @@
               FLAME2
               (species-colour (tree-species f)))]))
 
+; Biome -> Biome
+; consumes a biome b and outputs a new biome every tick
+
+(check-expect (checked-tock BIOME0) BIOME0)
+
+(check-expect (checked-tock (make-biome (list (make-tree TOTARA (make-posn 0 0) #false))
+                                (make-weather 0 0 0)
+                                '()))
+              (make-biome (list (make-tree TOTARA (make-posn 0 0) #true))
+                                (make-weather 0 0 0)
+                                '()))
+
+(define (fn-tock b)
+  (extract-burn b (make-posn (... (... SCENE-SIZE ...))
+                             (... (... SCENE-SIZE ...)))))
+
+(define (tock b)
+  (extract-burn b (make-posn (random (+ SCENE-SIZE 1))
+                             (random (+ SCENE-SIZE 1)))))
+
+(define (checked-tock b)
+  (extract-burn b (make-posn 0 0)))
+
+; main
+
+(define (main rate)
+  (big-bang (generate-biome BIOME0 1000)
+    [on-tick tock rate]
+    [to-draw render-forest]
+;    [on-mouse control]
+;    [stop-when end-game? last-picture]
+    [state #f]
+    [name "Regrowth"]
+;    ;[close-on-stop 3]
+    ))
+
+; usage
+
+;(main 0.005)
+
 
 
 
