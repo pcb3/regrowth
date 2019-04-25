@@ -33,6 +33,7 @@
 (define-struct species [name colour height])
 (define-struct weather [soil wind rain])
 (define-struct animal [species position population])
+(define-struct info [status]) ; explain
 
 ; Interpretation:
 
@@ -373,13 +374,65 @@
 (define (checked-tock b)
   (extract-burn b (make-posn 0 0)))
 
+; Biome -> Image
+; draws a biome to the screen
+
+(check-expect (render BIOME0) MT)
+
+(check-expect (render (make-biome (list (make-tree TOTARA (make-posn 0 0) #false))
+                                  (make-weather 0 0 0) '()))
+              (place-image (TREE 'goldenrod) 0 0 MT))
+
+(define (fn-render b)
+  (render-forest b))
+
+(define (render b)
+  (render-forest b))
+
+; Biome Number Number MouseEvent -> List
+; deal with a mouse hover at (x,y) of kind move in the current biome b
+(define (hover b x y me) ...)
+
+(check-expect (hover BIOME0 0 0 "move") '())
+
+(check-expect (hover (make-biome (list (make-tree TOTARA (make-posn 0 0) #false))
+                                 (make-weather 0 0 0) '())
+                     0 0 "move")
+              (list "Totara" 'goldenrod TOTARA-MAX-HEIGHT (make-posn 0 0) #false))
+
+(define (fn-hover b x y me)
+  (cond
+    [(mouse-event? "move")
+     (cond
+       [else (if (equal? (tree-position (first (biome-forest b))) (make-posn x y))
+                 (extract-info (first (biome-forest b)))
+                 (fn-hover (make-biome (rest (biome-forest b))
+                                       (biome-weather b)
+                                       (biome-mammal b))
+                           x y me))])]))
+
+(define (hover b x y me)
+  (cond
+    [(mouse-event? "move")
+     (cond
+       [else (if (equal? (tree-position (first (biome-forest b))) (make-posn x y))
+                 (extract-info (first (biome-forest b)))
+                 (hover (make-biome (rest (biome-forest b))
+                                       (biome-weather b)
+                                       (biome-mammal b))
+                           x y me))])]))
+
+; Tree -> List
+; consumes a tree t and outputs a list of the tree status
+(define (extract-info t) '())
+
 ; main
 
 (define (main rate)
   (big-bang (generate-biome BIOME0 1000)
     [on-tick tock rate]
-    [to-draw render-forest]
-;    [on-mouse control]
+    [to-draw render]
+;    [on-mouse hover]
 ;    [stop-when end-game? last-picture]
     [state #f]
     [name "Regrowth"]
