@@ -207,8 +207,7 @@
 (define (render-forest b)
   (cond
     [(empty? (biome-forest b)) MT]
-    [else (place-image (TREE
-                        (species-colour (tree-species (first (biome-forest b)))))
+    [else (place-image (TREE (is-burning? (first (biome-forest b))))
                        (posn-x (tree-position (first (biome-forest b))))
                        (posn-y (tree-position (first (biome-forest b))))
                        (render-forest
@@ -270,12 +269,12 @@
 (check-expect (extract-burn BIOME0 (make-posn 0 0)) BIOME0)
 
 (check-expect (extract-burn (make-biome
-                     (list (make-tree "Totara" (make-posn 0 0) #false))
-                     (make-weather 0 0 0) '())
-                    (make-posn 0 0))
+                             (list (make-tree "Totara" (make-posn 0 0) #false))
+                             (make-weather 0 0 0) '())
+                            (make-posn 0 0))
               (make-biome
-                     (list (make-tree "Totara" (make-posn 0 0) #true))
-                     (make-weather 0 0 0) '()))
+               (list (make-tree "Totara" (make-posn 0 0) #true))
+               (make-weather 0 0 0) '()))
 
 (define (fn-extract-burn b p)
   (make-biome (... (biome-forest b) p) (biome-weather b) (biome-mammal b)))
@@ -320,45 +319,36 @@
     [(empty? f) f]
     [(equal? (tree-position (first f)) p)
      (cons (make-tree (tree-species (first f))
-                     (tree-position (first f))
-                     #true)
-          (burn (rest f) p))]
+                      (tree-position (first f))
+                      #true)
+           (burn (rest f) p))]
     [else (cons (first f) (burn (rest f) p))]))
 
 (define BIOME2 (generate-biome BIOME0 2))
 
-; Biome -> String
-; consumes a biome b and outputs a new colour if the condition is true
+; Forest -> String
+; consumes a forest f and outputs a new colour if the condition is true
 
-(check-expect (is-burning? (make-biome
-                            (list (make-tree TOTARA (make-posn 0 0) #false))
-                            (make-weather 0 0 0) '()))
+(check-expect (is-burning? (make-tree TOTARA (make-posn 0 0) #false))
               'goldenrod)
 
-(check-expect (is-burning? (make-biome
-                            (list (make-tree RIMU (make-posn 0 0) #false)
-                                  (make-tree TOTARA (make-posn 0 0) #true))
-                            (make-weather 0 0 0) '()))
+(check-expect (is-burning? (make-tree RIMU (make-posn 0 0) #false))
               'brown)
 
-
-(check-expect (is-burning? (make-biome
-                            (list (make-tree RIMU (make-posn 0 0) #true)
-                                  (make-tree TOTARA (make-posn 0 0) #false))
-                            (make-weather 0 0 0) '()))
+(check-expect (is-burning? (make-tree RIMU (make-posn 0 0) #true))
               FLAME2)
 
-(define (fn-is-burning? b)
+(define (fn-is-burning? f)
   (cond
-    [else (... (boolean=? #true (tree-burning (first (biome-forest b))))
-              ...
-              (species-colour (tree-species (first (biome-forest b)))))]))
+    [else (... (boolean=? #true (tree-burning f))
+               ...
+               (species-colour (tree-species f)))]))
 
-(define (is-burning? b)
+(define (is-burning? f)
   (cond
-    [else (if (boolean=? #true (tree-burning (first (biome-forest b))))
+    [else (if (boolean=? #true (tree-burning f))
               FLAME2
-              (species-colour (tree-species (first (biome-forest b)))))]))
+              (species-colour (tree-species f)))]))
 
 
 
