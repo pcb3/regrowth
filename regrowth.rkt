@@ -13,15 +13,15 @@
 (define MAX SCENE-SIZE)
 (define TREE-SPECIES 4)
 (define TOTARA-MAX-HEIGHT 15)
-(define TOTARA-COLOUR 'goldenrod)
+(define TOTARA-COLOUR "goldenrod")
 (define RIMU-MAX-HEIGHT 60)
-(define RIMU-COLOUR 'brown)
+(define RIMU-COLOUR "brown")
 (define MATAI-MAX-HEIGHT 40)
-(define MATAI-COLOUR 'olive)
+(define MATAI-COLOUR "olive")
 (define PONGA-MAX-HEIGHT 12)
-(define PONGA-COLOUR 'silver)
-(define FLAME1 'orange)
-(define FLAME2 'red)
+(define PONGA-COLOUR "silver")
+(define FLAME1 "orange")
+(define FLAME2 "red")
 
 ; graphical constants
 (define MT (empty-scene SCENE-SIZE SCENE-SIZE))
@@ -330,10 +330,10 @@
 ; consumes a forest f and outputs a new colour if the condition is true
 
 (check-expect (is-burning? (make-tree TOTARA (make-posn 0 0) #false))
-              'goldenrod)
+              "goldenrod")
 
 (check-expect (is-burning? (make-tree RIMU (make-posn 0 0) #false))
-              'brown)
+              "brown")
 
 (check-expect (is-burning? (make-tree RIMU (make-posn 0 0) #true))
               FLAME2)
@@ -380,13 +380,13 @@
 
 (check-expect (render (make-biome (list (make-tree TOTARA (make-posn 0 0) #false))
                                   (make-weather 0 0 0) '()))
-              (place-image (TREE 'goldenrod) 0 0 MT))
+              (place-image (TREE "goldenrod") 0 0 MT))
 
 (define (fn-render b)
   (render-forest b))
 
 (define (render b)
-  (render-forest b))
+  (render-forest b))  
 
 ; Biome Number Number MouseEvent -> Info
 ; deal with a mouse hover at (x,y) of kind move in the current biome b
@@ -449,31 +449,68 @@
               (first f)
               (tree-at-position p (rest f)))]))
 
+; Biome -> Image
+; consumes a biome b and outputs and draws an image to the screen
 
+; (check-expect (render-mammal BIOME0) MT)
 
-; Tree -> Biome
-; consumes a tree t and outputs the tree status as a list in the
+(check-expect (render-mammal
+               (make-biome '()
+                           (make-weather 0 0 0)
+                           (list (make-tree TOTARA (make-posn 0 0) #false))))
+              (overlay/align/offset
+               "left" "top"
+               (beside (text (string-append "| Species: "
+                                            (species-name TOTARA)) 16 'black)
+                       (text (string-append " | Colour: "
+                                            (species-colour TOTARA)) 16 'black)
+                       (text (string-append " | Height: "
+                                            (number->string
+                                             (species-height TOTARA)) "m |")
+                             16 'black))
+               -5 -5 MT))
 
-(check-expect (extract-info (make-tree TOTARA (make-posn 0 0) #false))
-              (list "Totara" 
-                    'goldenrod
-                    TOTARA-MAX-HEIGHT
-                    (make-posn 0 0)
-                    #false))
+(define (fn-render-mammal b)
+  (overlay/align/offset
+   ... ...
+   (beside
+    (text
+     (string-append ...
+                    (species-name
+                     (tree-species
+                      (first (biome-mammal b))))) ... ...)
+    (text (string-append ...
+                         (species-colour
+                          (tree-species
+                           (first (biome-mammal b))))) ... ...)
+    (text (string-append ...
+                         (number->string
+                          (species-height
+                           (tree-species
+                            (first (biome-mammal b))))) ...)
+          ... ...))
+   ... ...))
 
-(define (fn-extract-info t)
-  (... (species-name (tree-species t))
-       (species-colour (tree-species t))
-       (species-height (tree-species t))
-       (tree-position t)
-       (tree-burning t)))
-
-(define (extract-info t)
-  (list (species-name (tree-species t))
-        (species-colour (tree-species t))
-        (species-height (tree-species t))
-        (tree-position t)
-        (tree-burning t)))
+(define (render-mammal b)
+  (overlay/align/offset
+   "left" "top"
+   (beside
+    (text
+     (string-append "| Species: "
+                    (species-name
+                     (tree-species
+                      (first (biome-mammal b))))) 16 'black)
+    (text (string-append " | Colour: "
+                         (species-colour
+                          (tree-species
+                           (first (biome-mammal b))))) 16 'black)
+    (text (string-append " | Height: "
+                         (number->string
+                          (species-height
+                           (tree-species
+                            (first (biome-mammal b))))) "m |")
+          16 'black))
+   -5 -5 MT))
 
 ; main
 
