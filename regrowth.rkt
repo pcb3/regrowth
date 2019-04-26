@@ -383,10 +383,17 @@
               (place-image (TREE "goldenrod") 0 0 MT))
 
 (define (fn-render b)
-  (render-forest b))
+  (cond
+    [(empty? (biome-mammal b))
+     (render-forest b)]
+    [... (render-mammal b (render-forest b))]))
 
 (define (render b)
-  (render-forest b))  
+  (cond
+    [(empty? (biome-mammal b))
+     (render-forest b)]
+    [else
+     (render-mammal b (render-forest b))]))
 
 ; Biome Number Number MouseEvent -> Info
 ; deal with a mouse hover at (x,y) of kind move in the current biome b
@@ -457,7 +464,7 @@
 (check-expect (render-mammal
                (make-biome '()
                            (make-weather 0 0 0)
-                           (list (make-tree TOTARA (make-posn 0 0) #false))))
+                           (list (make-tree TOTARA (make-posn 0 0) #false))) MT)
               (overlay/align/offset
                "left" "top"
                (beside (text (string-append "| Species: "
@@ -476,22 +483,22 @@
    (beside
     (text
      (string-append ...
-                    (species-name
-                     (tree-species
-                      (first (biome-mammal b))))) ... ...)
+      (species-name
+       (tree-species
+        (first (biome-mammal b))))) ... ...)
     (text (string-append ...
-                         (species-colour
-                          (tree-species
-                           (first (biome-mammal b))))) ... ...)
+           (species-colour
+            (tree-species
+             (first (biome-mammal b))))) ... ...)
     (text (string-append ...
-                         (number->string
-                          (species-height
-                           (tree-species
-                            (first (biome-mammal b))))) ...)
+           (number->string
+            (species-height
+             (tree-species
+              (first (biome-mammal b))))) ...)
           ... ...))
    ... ...))
 
-(define (render-mammal b)
+(define (render-mammal b rf)
   (overlay/align/offset
    "left" "top"
    (beside
@@ -510,7 +517,7 @@
                            (tree-species
                             (first (biome-mammal b))))) "m |")
           16 'black))
-   -5 -5 MT))
+   -5 -5 rf))
 
 ; main
 
