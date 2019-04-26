@@ -33,7 +33,6 @@
 (define-struct species [name colour height])
 (define-struct weather [soil wind rain])
 (define-struct animal [species position population])
-(define-struct info [status]) ; explain
 
 ; Interpretation:
 
@@ -389,44 +388,71 @@
 (define (render b)
   (render-forest b))
 
-; Biome Number Number MouseEvent -> List
+; Biome Number Number MouseEvent -> Info
 ; deal with a mouse hover at (x,y) of kind move in the current biome b
+; and returns the biome with the tree in the mammal field of biome
 
 (check-expect (hover BIOME0 0 0 "move") BIOME0)
 
 (check-expect (hover (make-biome (list (make-tree TOTARA (make-posn 0 0) #false))
-                                 (make-weather 0 0 0) '())
-                     0 0 "move")
-              (make-info
-               (list "Totara" 'goldenrod
-                     TOTARA-MAX-HEIGHT (make-posn 0 0) #false)))
+                                 (make-weather 0 0 0) '()) 0 0 "move")
+              (make-biome
+               (list (make-tree TOTARA (make-posn 0 0) #false))
+               (make-weather 0 0 0)
+               (list (make-tree TOTARA (make-posn 0 0) #false))))
 
 (define (fn-hover b x y me)
   (cond
-    [(empty? (biome-forest b)) b]
-    [(mouse-event? "move")
+    [(mouse-event? ...)
      (cond
-       [else (if (equal? (tree-position (first (biome-forest b))) (make-posn x y))
-                 (extract-info (first (biome-forest b)))
-                 (fn-hover (make-biome (rest (biome-forest b))
-                                       (biome-weather b)
-                                       (biome-mammal b))
-                           x y me))])]))
+       [(is-position? (make-posn x y) (biome-forest b))
+        (make-biome
+         (biome-forest b)
+         (biome-weather b)
+         (... (tree-at-position (make-posn x y) (biome-forest b))))]
+       [else b])]
+    [else b]))
 
 (define (hover b x y me)
   (cond
-    [(empty? (biome-forest b)) b]
     [(mouse-event? "move")
      (cond
-       [else (if (equal? (tree-position (first (biome-forest b))) (make-posn x y))
-                 (make-info (extract-info (first (biome-forest b))))
-                 (hover (make-biome (rest (biome-forest b))
-                                    (biome-weather b)
-                                    (biome-mammal b))
-                        x y me))])]))
+       [(is-position? (make-posn x y) (biome-forest b))
+        (make-biome
+         (biome-forest b)
+         (biome-weather b)
+         (list (tree-at-position (make-posn x y) (biome-forest b))))]
+       [else b])]
+    [else b]))
 
-; Tree -> List
-; consumes a tree t and outputs the tree status as a list
+; Posn Forest -> Tree
+; consumes a position p and a forest f, and outputs the tree at that
+; position
+
+(check-expect (tree-at-position (make-posn 0 0) '()) '())
+
+(check-expect (tree-at-position (make-posn 0 0)
+                                (list (make-tree TOTARA (make-posn 0 0) #false)))
+              (make-tree TOTARA (make-posn 0 0) #false))              
+
+(define (fn-tree-at-position p f)
+  (cond
+    [(empty? f) '()]
+    [else (... (equal? p (tree-position (first f)))
+               (first f)
+               (fn-tree-at-positon p (rest f)))]))
+              
+(define (tree-at-position p f)
+  (cond
+    [(empty? f) '()]
+    [else (if (equal? p (tree-position (first f)))
+              (first f)
+              (tree-at-position p (rest f)))]))
+
+
+
+; Tree -> Biome
+; consumes a tree t and outputs the tree status as a list in the
 
 (check-expect (extract-info (make-tree TOTARA (make-posn 0 0) #false))
               (list "Totara" 
