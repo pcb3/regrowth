@@ -357,11 +357,11 @@
 (check-expect (checked-tock BIOME0) BIOME0)
 
 (check-expect (checked-tock (make-biome (list (make-tree TOTARA (make-posn 0 0) #false))
-                                (make-weather 0 0 0)
-                                '()))
+                                        (make-weather 0 0 0)
+                                        '()))
               (make-biome (list (make-tree TOTARA (make-posn 0 0) #true))
-                                (make-weather 0 0 0)
-                                '()))
+                          (make-weather 0 0 0)
+                          '()))
 
 (define (fn-tock b)
   (extract-burn b (make-posn (... (... SCENE-SIZE ...))
@@ -391,17 +391,19 @@
 
 ; Biome Number Number MouseEvent -> List
 ; deal with a mouse hover at (x,y) of kind move in the current biome b
-(define (hover b x y me) ...)
 
-(check-expect (hover BIOME0 0 0 "move") '())
+(check-expect (hover BIOME0 0 0 "move") BIOME0)
 
 (check-expect (hover (make-biome (list (make-tree TOTARA (make-posn 0 0) #false))
                                  (make-weather 0 0 0) '())
                      0 0 "move")
-              (list "Totara" 'goldenrod TOTARA-MAX-HEIGHT (make-posn 0 0) #false))
+              (make-info
+               (list "Totara" 'goldenrod
+                     TOTARA-MAX-HEIGHT (make-posn 0 0) #false)))
 
 (define (fn-hover b x y me)
   (cond
+    [(empty? (biome-forest b)) b]
     [(mouse-event? "move")
      (cond
        [else (if (equal? (tree-position (first (biome-forest b))) (make-posn x y))
@@ -413,18 +415,39 @@
 
 (define (hover b x y me)
   (cond
+    [(empty? (biome-forest b)) b]
     [(mouse-event? "move")
      (cond
        [else (if (equal? (tree-position (first (biome-forest b))) (make-posn x y))
-                 (extract-info (first (biome-forest b)))
+                 (make-info (extract-info (first (biome-forest b))))
                  (hover (make-biome (rest (biome-forest b))
-                                       (biome-weather b)
-                                       (biome-mammal b))
-                           x y me))])]))
+                                    (biome-weather b)
+                                    (biome-mammal b))
+                        x y me))])]))
 
 ; Tree -> List
-; consumes a tree t and outputs a list of the tree status
-(define (extract-info t) '())
+; consumes a tree t and outputs the tree status as a list
+
+(check-expect (extract-info (make-tree TOTARA (make-posn 0 0) #false))
+              (list "Totara" 
+                    'goldenrod
+                    TOTARA-MAX-HEIGHT
+                    (make-posn 0 0)
+                    #false))
+
+(define (fn-extract-info t)
+  (... (species-name (tree-species t))
+       (species-colour (tree-species t))
+       (species-height (tree-species t))
+       (tree-position t)
+       (tree-burning t)))
+
+(define (extract-info t)
+  (list (species-name (tree-species t))
+        (species-colour (tree-species t))
+        (species-height (tree-species t))
+        (tree-position t)
+        (tree-burning t)))
 
 ; main
 
@@ -432,11 +455,11 @@
   (big-bang (generate-biome BIOME0 1000)
     [on-tick tock rate]
     [to-draw render]
-;    [on-mouse hover]
-;    [stop-when end-game? last-picture]
+    [on-mouse hover]
+    ;    [stop-when end-game? last-picture]
     [state #f]
     [name "Regrowth"]
-;    ;[close-on-stop 3]
+    ;    ;[close-on-stop 3]
     ))
 
 ; usage
